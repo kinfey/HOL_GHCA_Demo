@@ -14,6 +14,14 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 
 ## Code standards
 
+### Comments and documentation
+
+- Comment intent, tradeoffs, invariants, and non-obvious constraints — never restate what the next line of code already makes clear
+- Treat stale comments as bugs; update or delete them in the same change that updates the related code
+- Every exported function in `db/` and `src/lib/` must have a TSDoc/JSDoc block that describes its purpose, each parameter, and its return value
+- Always document the injectable `db` parameter on data-layer helpers so callers understand that pages pass the real database client and tests pass an in-memory database
+- Reusable `.astro` components must document their `Props` interface so the component contract is self-explanatory to the next reader
+
 ### Required Before Each Commit
 
 #### Testing guidelines
@@ -35,7 +43,8 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 ### Code formatting requirements
 
 - Use TypeScript with explicit types for function parameters and return values, especially in the data layer (`db/`, `src/lib/`)
-- Frontend code (TypeScript, Astro) must pass ESLint checks (`npm run lint`)
+- Keep exported TypeScript APIs self-documenting with named types/interfaces instead of opaque inline shapes when a contract is reused
+- Frontend code (TypeScript, Astro) must pass ESLint checks, and the data-layer lint rules enforce explicit boundary types where the current ESLint stack can do so
 
 ### Data Layer Patterns (Drizzle + libSQL)
 
@@ -43,6 +52,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 - Keep data-access helpers in `src/lib/` with an **injectable `db`** argument so they're testable
 - Keep CSV/seed logic as pure functions in `db/transforms.ts`
 - Seed-derived values must be deterministic (no `Math.random`) so static builds are reproducible
+- Add TSDoc/JSDoc to every exported helper/function in `db/` and `src/lib/`, including `@param` / `@returns` details
 
 ### Astro Patterns
 
@@ -51,6 +61,7 @@ This is a crowdfunding platform for games with a developer theme. The applicatio
 - Dynamic routes use `getStaticPaths()` + `export const prerender = true`
 - Provide a branded `404.astro` (unknown routes are real 404s under static output)
 - Only add a scoped Astro `<script>` when genuine client interactivity is required
+- Document reusable component `Props` interfaces with doc comments so the public contract is obvious at a glance
 
 ### Styling
 

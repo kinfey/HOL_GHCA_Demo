@@ -55,6 +55,27 @@ export async function getAllGameIds(db: Database): Promise<number[]> {
 - Map raw rows to the app-facing `Game`/`Publisher`/`Category` types in one place; don't leak Drizzle row shapes into components.
 - Keep ordering/lookup logic in `games.ts`, not in pages.
 
+## Documentation Standards
+
+- Every exported function in `db/` and `src/lib/` must have a TSDoc/JSDoc block.
+- Start with a short purpose statement, then document every parameter with `@param` and the return value with `@returns`.
+- Document the injectable `db` parameter explicitly so readers know whether the caller should pass the production database client or a test database.
+- Use comments for intent, invariants, or non-obvious query/seed decisions; do not narrate straightforward Drizzle calls line-by-line.
+- Treat stale comments as bugs and fix or remove them alongside the related code change.
+
+```ts
+/**
+ * Returns every game id in title order so static route generation stays deterministic.
+ *
+ * @param db - The database client to query. Pages pass the real client; tests pass an in-memory database.
+ * @returns The ordered list of persisted game ids.
+ */
+export async function getAllGameIds(db: Database): Promise<number[]> {
+  const rows = await db.select({ id: games.id }).from(games).orderBy(asc(games.title));
+  return rows.map((row) => row.id);
+}
+```
+
 ## Determinism
 
 Seed-derived values must be reproducible across builds. Derive star ratings from a stable hash of the title (`ratingFromTitle`) — **never** `Math.random()`.
@@ -65,5 +86,4 @@ Unit-test transforms directly and helpers against `createTestDatabase()`. See [`
 
 ## Type checking
 
-The data layer (`db/**/*.ts`, `src/lib/*.ts`) is type-checked by `npm run typecheck`, which runs the native **TypeScript 7** compiler (`tsgo`, from `@typescript/native-preview`) against `tsconfig.tsgo.json`. Keep helpers exported with explicit parameter and return types so `tsgo` can verify them. Linting is unaffected — ESLint + `typescript-eslint` still run on the classic `typescript` package.
-
+The data layer (`db/**/*.ts`, `src/lib/*.ts`) is type-checked by `npm run typecheck`, which runs the native **TypeScript 7** compiler (`tsgo`, from `@typescript/native-preview`) against `tsconfig.tsgo.json`. Keep helpers exported with explicit parameter and return types so `tsgo` can verify them. ESLint also enforces explicit module boundary types for this layer on the current toolchain, while the richer TSDoc requirements remain a documented review expectation.

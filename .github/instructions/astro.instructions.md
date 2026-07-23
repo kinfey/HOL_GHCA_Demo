@@ -9,6 +9,14 @@ applyTo: '**/*.astro'
 
 Astro handles everything in the UI: pages, layouts, components, routing, and content. The site is **fully prerendered** (`output: 'static'`) — there is no client-side UI framework and no separate API server. Pages read data **directly in frontmatter** at build time via the Drizzle/libSQL data-access helpers in `src/lib/`.
 
+## Comments & Documentation
+
+- Comment the intent behind a component, route, or interaction only when that intent is not obvious from the Astro markup itself
+- Do not add comments that paraphrase nearby HTML, Tailwind classes, or frontmatter assignments
+- Treat outdated comments as bugs and update or remove them with the code they describe
+- For reusable components, document the `Props` interface with a doc comment so the component contract is self-explanatory
+- Add property-level doc comments when a prop name alone does not make its purpose, format, or expectations obvious
+
 ### Component Structure
 
 ```astro
@@ -19,6 +27,9 @@ import GameCard from '../components/GameCard.astro';
 import { getDatabase } from '../lib/db';
 import { getAllGames } from '../lib/games';
 
+/**
+ * Props consumed by the page-level Astro component.
+ */
 interface Props {
   title: string;
 }
@@ -43,6 +54,9 @@ const games = await getAllGames(getDatabase());
 
 ```astro
 ---
+/**
+ * Props supported by the shared layout component.
+ */
 interface Props {
   title: string;
 }
@@ -109,10 +123,26 @@ There is no Svelte/React layer. When a page genuinely needs client behaviour, ad
 ## TypeScript
 
 - Use TypeScript for type-safe props
-- Define `Props` interface in frontmatter
+- Define a documented `Props` interface in frontmatter for reusable components
 - Type component imports and helper return values
 - Run `npx astro sync` to (re)generate route/content types before linting or type-checking
 - `.astro` files are type-checked by `npm run typecheck:astro` (which runs `astro sync` then `astro check`), on the classic `typescript` package. The pure TypeScript in `db/`, `src/lib/`, and `src/types/` is type-checked separately by `npm run typecheck` (the native TS 7 compiler, `tsgo`), which does **not** process `.astro` files.
+
+### `Props` Documentation Example
+
+```astro
+---
+/**
+ * Props for the reusable PageHero component.
+ */
+interface Props {
+  /** Primary heading shown at the top of the page. */
+  title: string;
+  /** Optional supporting copy rendered below the heading. */
+  subtitle?: string;
+}
+---
+```
 
 ## Best Practices
 
