@@ -170,6 +170,28 @@ test.describe('Accessibility Tests', () => {
     expect(hasAriaLabel || svgAccessible).toBeTruthy();
   });
 
+  test('filter controls should be labelled and keyboard operable', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
+
+    await expect(page.getByRole('heading', { name: 'Filter games' })).toBeVisible();
+    const categoryCheckbox = page.locator('input[name="category-filter"]').first();
+    await expect(categoryCheckbox).toBeVisible();
+
+    await categoryCheckbox.focus();
+    await expect(categoryCheckbox).toBeFocused();
+    await page.keyboard.press('Space');
+    await expect(categoryCheckbox).toBeChecked();
+
+    const publisherSelect = page.getByLabel('Publisher');
+    await expect(publisherSelect).toBeVisible();
+    await publisherSelect.focus();
+    await expect(publisherSelect).toBeFocused();
+
+    await expect(page.getByTestId('clear-filters-button')).toBeVisible();
+    await expect(page.getByTestId('filter-results-count')).toHaveAttribute('role', 'status');
+  });
+
   test('color contrast - should meet WCAG AA standards', async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('[data-testid="games-grid"]', { timeout: 10000 });
